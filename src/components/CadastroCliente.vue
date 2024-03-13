@@ -37,7 +37,7 @@
                 </div>
                 <div class="col-2">
                     <label>Data de Cadastro</label>
-                    <input class="form-control" type="date" v-model="dataCadastro" disabled>
+                    <input class="form-control" type="text" v-model="dataCadastro" disabled>
                 </div>
                 <div class=col-1></div>
             </div>
@@ -131,7 +131,7 @@
             <div class="row mt-1 justify-content-md-center">
                 <div class="col-2">
                     <label>Senha</label>
-                    <input class="form-control" type="text" min="8" maxlength="15" v-model="senha">
+                    <input class="form-control" type="password" min="8" maxlength="15" v-model="senha">
                     <div class="text-danger" :class="{'visibility: hidden': !v$.senha.$errors}">{{ v$.senha.$errors[0]?.$message }}&nbsp;</div>
                 </div>
                 <div class="col-1 mt-4" data-bs-toggle="tooltip" data-bs-placement="top" title="Cadastre a senha de acesso do seu Cliente">
@@ -139,7 +139,7 @@
                 </div>
                 <div class="col-2">
                     <label>Confirmação de Senha</label>
-                    <input class="form-control" type="text" min="8" maxlength="15" v-model="confirmacaoSenha">
+                    <input class="form-control" type="password" min="8" maxlength="15" v-model="confirmacaoSenha">
                     <div class="text-danger" :class="{'visibility: hidden': !v$.confirmacaoSenha.$errors}">{{ v$.confirmacaoSenha.$errors[0]?.$message }}&nbsp;</div>
                 </div>
                 <div class="col-1"></div>
@@ -168,18 +168,18 @@ export default {
     data(){
         return {
             nomeRazaoSocial: "",
-            email: "dasdas@gmail.com",
-            telefone: "4644",
+            email: "",
+            telefone: "",
             dataCadastro: new Date(),
             tipoPessoa: "1",
-            documento: "46546546",
-            inscricaoEstadual: "5564564",
+            documento: "",
+            inscricaoEstadual: "",
             isento: false,
             genero: "1",
             dataNascimento: "",
             bloqueado: false,
-            senha: "123456789",
-            confirmacaoSenha: "123456789",
+            senha: "",
+            confirmacaoSenha: "",
             ehEdicao: false,
             inscricaoEstadualBackup: ""
         }
@@ -214,7 +214,9 @@ export default {
                 }))
             },
             inscricaoEstadual: {
-                required: helpers.withMessage("Este campo é obrigatório", required)
+                required: helpers.withMessage("Este campo é obrigatório", requiredIf(function() {
+                    return !this.isento;
+                }))
             }
         }
     },
@@ -301,10 +303,12 @@ export default {
             });
         },
         popularDadosCliente(cliente){
+            let dataCadastro = cliente.dataCadastro.toString().split('T')[0].split('-');
+
             this.nomeRazaoSocial = cliente.nome;
             this.email = cliente.email;
             this.dataNascimento = cliente.dataNascimento?.toString()?.split('T')[0] ?? "";
-            this.dataCadastro = cliente.dataCadastro.toString().split('T')[0];
+            this.dataCadastro = `${dataCadastro[2]}/${dataCadastro[1]}/${dataCadastro[0]}`;
             this.senha = cliente.senha;
             this.telefone = cliente.telefone;
             this.tipoPessoa = cliente.tipoPessoa.toString();
@@ -312,6 +316,20 @@ export default {
             this.inscricaoEstadual = cliente.inscricaoEstadual;
             this.bloqueado = cliente.bloqueado;
             this.confirmacaoSenha = cliente.senha;
+        },
+        limparDadosCliente(){
+            this.dataCadastro = this.dataCadastro = new Date(Date.now()).toLocaleDateString();
+            this.nomeRazaoSocial = "";
+            this.email = "";
+            this.dataNascimento = "";
+            this.senha = "";
+            this.telefone = "";
+            this.tipoPessoa = "1";
+            this.documento = "";
+            this.inscricaoEstadual = "";
+            this.inscricaoEstadualBackup = "";
+            this.bloqueado = "";
+            this.confirmacaoSenha = "";
         }
     },
     watch: {
@@ -327,6 +345,8 @@ export default {
                     console.log(error);
                 })
             }
+            else
+                this.limparDadosCliente();
         },
         async isento(){
             if(this.isento){

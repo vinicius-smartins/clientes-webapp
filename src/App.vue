@@ -24,6 +24,8 @@ export default {
       this.exibirAreaPesquisa = !this.exibirAreaPesquisa;
     },
     exibirCadastroDeClientes(){
+      if(this.exibirAreaPesquisa)
+        this.exibirAreaDePesquisa();
       this.exibirCadastroClientes = true;
     },
     ocultarCadastroDeClientes(){
